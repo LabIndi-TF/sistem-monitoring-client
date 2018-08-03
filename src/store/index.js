@@ -23,6 +23,11 @@ export const store = new Vuex.Store({
     },
     setLatestTemperatures(state, temperatures) {
       state.latestTemperatures = temperatures
+    },
+    updateDevice(state, device) {
+      let devices = state.devices
+      devices.splice(devices.indexOf(device), 1)
+      state.devices = devices
     }
   },
   actions: {
@@ -62,6 +67,17 @@ export const store = new Vuex.Store({
         const limit = 20;
         axios.get(`/Devices/${deviceId}/temperatures?filter[order]=date_added%20DESC&filter[limit]=${limit}`).then(res => {
           ctx.commit("setLatestTemperatures", res.data)
+          resolve()
+        }).catch(e => {
+          reject(e)
+        })
+      })
+    },
+    updateDevice(ctx, payload) {
+      return new Promise((resolve, reject) => {
+        const deviceId = ctx.state.selected_device.id;
+        axios.put(`/Devices/${deviceId}`, payload).then(res => {
+          ctx.commit("updateDevice", res.data)
           resolve()
         }).catch(e => {
           reject(e)
